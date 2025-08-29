@@ -10,8 +10,9 @@ from pybiwenger.src.client.urls import url_players_market
 from pybiwenger.utils.log import PabLog
 
 
-class Market(BiwengerBaseClient):
+class MarketAPI(BiwengerBaseClient):
     """Client for retrieving market data from the Biwenger API."""
+
     def __init__(self) -> None:
         super().__init__()
         self.url = url_players_market

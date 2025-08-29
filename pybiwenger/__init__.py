@@ -3,9 +3,9 @@
 import os
 import typing as t
 
+from pybiwenger.src.biwenger.league import League
 from pybiwenger.src.biwenger.market import Market
 from pybiwenger.src.biwenger.players import Players
-from pybiwenger.src.biwenger.league import League
 from pybiwenger.src.client.client import BiwengerBaseClient
 from pybiwenger.utils.log import PabLog
 

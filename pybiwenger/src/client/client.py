@@ -2,17 +2,18 @@
 
 Handles authentication, session management, and basic API requests for Biwenger.
 """
+
 import json
 import os
 import typing as t
 
 import requests
+from pydantic import BaseModel
 from retry import retry
 
 from pybiwenger.src.client.urls import url_account, url_login
-from pybiwenger.utils.log import PabLog
-from pydantic import BaseModel
 from pybiwenger.types.account import *
+from pybiwenger.utils.log import PabLog
 
 lg = PabLog(__name__)
 
@@ -41,12 +42,14 @@ class BiwengerBaseClient:
         self.token: t.Optional[str] = None
         self._refresh_token()
         self.session = requests.Session()
-        self.session.headers.update({
-            "Content-type": "application/json",
-            "Accept": "application/json, text/plain, */*",
-            "X-Lang": "es",
-            "Authorization": self.auth,
-        })
+        self.session.headers.update(
+            {
+                "Content-type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+                "X-Lang": "es",
+                "Authorization": self.auth,
+            }
+        )
         self.account: AccountData = self._get_account_info()
 
     def _refresh_token(self) -> None:
@@ -87,7 +90,7 @@ class BiwengerBaseClient:
         if result["status"] == 200:
             lg.log.info("call login ok!")
         else:
-            lg.log.error(result['message'])
+            lg.log.error(result["message"])
         if league_name is not None:
             os.environ["BIWENGER_LEAGUE_NAME"] = league_name
         else:
@@ -97,14 +100,16 @@ class BiwengerBaseClient:
             for x in result["data"]["leagues"]
             if x["name"] == os.getenv("BIWENGER_LEAGUE_NAME")
         ][0]
-        
+
         id_league = league_info["id"]
         id_user = league_info["user"]["id"]
         lg.log.info("Updating Headers with league and user info")
-        self.session.headers.update({
-            "X-League": repr(id_league),
-            "X-User": repr(id_user),
-        })
+        self.session.headers.update(
+            {
+                "X-League": repr(id_league),
+                "X-User": repr(id_user),
+            }
+        )
         if result["status"] == 200:
             lg.log.info("Account details fetched successfully.")
             return AccountData.model_validate_json(json.dumps(result["data"]))

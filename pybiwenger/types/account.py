@@ -1,10 +1,13 @@
-from typing import Any, Optional, List
+from typing import Any, List, Optional
+
 from pydantic import BaseModel
+
 
 class Device(BaseModel):
     type: str
     token: str
     updated: int
+
 
 class AccountModel(BaseModel):
     id: int
@@ -22,9 +25,11 @@ class AccountModel(BaseModel):
     source: Optional[str]
     devices: List[Device]
 
+
 class UserStatus(BaseModel):
     offers: int
     bids: int
+
 
 class LeagueUser(BaseModel):
     id: int
@@ -38,6 +43,7 @@ class LeagueUser(BaseModel):
     favorites: List[Any]
     points: int
     position: int
+
 
 class LeagueSettings(BaseModel):
     secret: str
@@ -66,6 +72,7 @@ class LeagueSettings(BaseModel):
     auctions: bool
     customScore: bool
 
+
 class UpgradePlan(BaseModel):
     id: str
     currency: str
@@ -74,9 +81,11 @@ class UpgradePlan(BaseModel):
     huawei: str
     apple: str
 
+
 class Upgrades(BaseModel):
     premium: UpgradePlan
     ultra: UpgradePlan
+
 
 class League(BaseModel):
     id: int
@@ -93,10 +102,12 @@ class League(BaseModel):
     settings: LeagueSettings
     upgrades: Upgrades
 
+
 class Location(BaseModel):
     country: str
     region: str
     city: str
+
 
 class AccountData(BaseModel):
     account: AccountModel

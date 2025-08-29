@@ -3,20 +3,21 @@
 Provides access to league information and users.
 """
 
+import json
+import typing as t
 
 from pydantic import BaseModel
 
 from pybiwenger.src.client import BiwengerBaseClient
+from pybiwenger.src.client.urls import url_all_players, url_league
 from pybiwenger.types.account import AccountData
 from pybiwenger.types.user import User
-from pybiwenger.src.client.urls import url_all_players, url_league
 from pybiwenger.utils.log import PabLog
-import typing as t
-import json
 
 
-class League(BiwengerBaseClient):
+class LeagueAPI(BiwengerBaseClient):
     """Client for retrieving league information from the Biwenger API."""
+
     def __init__(self) -> None:
         super().__init__()
         self._league_url = url_league + str(self.account.leagues[0].id)
@@ -27,7 +28,10 @@ class League(BiwengerBaseClient):
         Returns:
             Iterable[User]: List of users in the league.
         """
-        data = self.fetch(self._league_url)['data']
+        data = self.fetch(self._league_url)["data"]
         print(data)
-        users = [User.model_validate_json(json.dumps(player)) for player in data.get("users", [])]
+        users = [
+            User.model_validate_json(json.dumps(player))
+            for player in data.get("users", [])
+        ]
         return users
