@@ -11,3 +11,4 @@ url_ranking = "https://biwenger.as.com/api/v2/rounds/league"
 url_transfers = (
     "https://biwenger.as.com/api/v2/league/742220/board?type=transfer,market"
 )
+url_league = "https://biwenger.as.com/api/v2/league/"
