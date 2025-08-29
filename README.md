@@ -1,5 +1,5 @@
 # pybiwenger
-![pybiwenger][(https://github.com/pablominue/pybiwenger/blob/main/image.jpg?raw=true)]
+![pybiwenger](https://github.com/pablominue/pybiwenger/blob/main/logo.jpg?raw=true)
 
 pybiwenger is a Python Library that allows to interact with the Soccer Fantasy Game Biwenger.
 
