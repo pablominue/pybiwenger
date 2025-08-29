@@ -1,7 +1,11 @@
+import dotenv
+
 import pybiwenger
-from pybiwenger import Market
+
+dotenv.load_dotenv()
 
 pybiwenger.authenticate()
 
-market = Market()
-data = market.get_market_data()
+client = pybiwenger.Players()
+
+print(client.get_my_players())

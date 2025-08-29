@@ -1,7 +1,7 @@
 url_login = "https://biwenger.as.com/api/v2/auth/login"
 url_account = "https://biwenger.as.com/api/v2/account"
 url_players_market = "https://biwenger.as.com/api/v2/user?fields=players(id,owner),market(*,-userID),-trophies"
-url_players_league = "https://biwenger.as.com/api/v2/players/la-liga/"
+url_players_league = "https://biwenger.as.com/api/v2/players/la-liga"
 url_retire_market = "https://biwenger.as.com/api/v2/market?player="
 url_add_player_market = "https://biwenger.as.com/api/v2/market"
 url_all_players = (

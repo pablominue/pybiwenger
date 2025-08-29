@@ -1,6 +1,7 @@
 """Library to interact with the Biwenger API."""
 
 import os
+import typing as t
 
 from pybiwenger.src.biwenger.market import Market
 from pybiwenger.src.biwenger.players import Players
@@ -10,7 +11,13 @@ from pybiwenger.utils.log import PabLog
 lg = PabLog(__name__)
 
 
-def authenticate(username: str, password: str) -> None:
+def authenticate(
+    username: t.Optional[str] = None, password: t.Optional[str] = None
+) -> None:
+    if not username or not password:
+        if os.getenv("BIWENGER_USERNAME") and os.getenv("BIWENGER_PASSWORD"):
+            lg.log.info("Using existing environment variables for authentication.")
+            return
     """Create a Biwenger client instance and log in."""
     os.environ["BIWENGER_USERNAME"] = username
     os.environ["BIWENGER_PASSWORD"] = password
