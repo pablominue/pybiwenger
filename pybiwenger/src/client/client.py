@@ -1,5 +1,7 @@
-"""Client module for Biwenger API interaction."""
+"""Client module for Biwenger API interaction.
 
+Handles authentication, session management, and basic API requests for Biwenger.
+"""
 import json
 import os
 import typing as t
@@ -23,6 +25,10 @@ class BiwengerAuthError(Exception):
 
 class BiwengerBaseClient:
     def __init__(self) -> None:
+        """Initializes the BiwengerBaseClient.
+
+        Loads credentials from environment variables, authenticates, and sets up session headers.
+        """
         if os.getenv("BIWENGER_USERNAME") and os.getenv("BIWENGER_PASSWORD"):
             self.username = os.getenv("BIWENGER_USERNAME")
             self.password = os.getenv("BIWENGER_PASSWORD")
@@ -44,6 +50,12 @@ class BiwengerBaseClient:
         self.account: AccountData = self._get_account_info()
 
     def _refresh_token(self) -> None:
+        """Refreshes the authentication token by logging in to the Biwenger API.
+
+        Raises:
+            BiwengerAuthError: If login fails due to invalid credentials.
+        """
+
         lg.log.info("Login process")
         data = {"email": self.username, "password": self.password}
         headers = {
@@ -63,6 +75,14 @@ class BiwengerBaseClient:
             raise BiwengerAuthError("Login failed, check your credentials.")
 
     def _get_account_info(self, league_name: t.Optional[str] = None) -> AccountData:
+        """Fetches account information from the Biwenger API.
+
+        Args:
+            league_name (Optional[str]): Name of the league to select.
+
+        Returns:
+            AccountData: Parsed account data from the API.
+        """
         result = requests.get(url_account, headers=self.session.headers).json()
         if result["status"] == 200:
             lg.log.info("call login ok!")
@@ -91,6 +111,14 @@ class BiwengerBaseClient:
 
     @retry(tries=3, delay=2)
     def fetch(self, url: str) -> t.Optional[dict]:
+        """Fetches data from a given URL using the authenticated session.
+
+        Args:
+            url (str): The API endpoint to fetch data from.
+
+        Returns:
+            Optional[dict]: The response data if successful, None otherwise.
+        """
         if not self.authenticated or self.auth is None:
             lg.log.info("Not authenticated, cannot fetch data.")
             return None
