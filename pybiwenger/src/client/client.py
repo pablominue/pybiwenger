@@ -7,7 +7,7 @@ import typing as t
 import requests
 from retry import retry
 
-from pybiwenger.src.client.urls import url_login, url_account
+from pybiwenger.src.client.urls import url_account, url_login
 from pybiwenger.utils.log import PabLog
 
 lg = PabLog(__name__)
@@ -31,12 +31,13 @@ class BiwengerBaseClient:
         self.authenticated = False
         self.auth: t.Optional[str] = None
         self.token: t.Optional[str] = self._refresh_token()
-        self.headers = {
+        self.base_headers = {
             "Content-type": "application/json",
             "Accept": "application/json, text/plain, */*",
             "X-Lang": "es",
             "Authorization": self.auth,
         }
+        self.headers = self.base_headers.copy()
         self.get_account_info()
 
     def _refresh_token(self) -> t.Optional[str]:
@@ -65,7 +66,7 @@ class BiwengerBaseClient:
         if league_name is not None:
             os.environ["BIWENGER_LEAGUE_NAME"] = league_name
         else:
-            os.environ["BIWENGER_LEAGUE_NAME"] = result['data']['leagues'][0]['name']
+            os.environ["BIWENGER_LEAGUE_NAME"] = result["data"]["leagues"][0]["name"]
         league_info = [
             x
             for x in result["data"]["leagues"]
@@ -82,17 +83,17 @@ class BiwengerBaseClient:
             "X-User": repr(id_user),
             "Authorization": self.auth,
         }
-        print(self.headers)
         if result["status"] == 200:
             lg.log.info("call login ok!")
             return
 
     @retry(tries=3, delay=2)
-    def fetch(self, url: str) -> t.Optional[dict]:
+    def fetch(self, url: str, league_headers: bool = True) -> t.Optional[dict]:
         if not self.authenticated or self.auth is None:
             lg.log.info("Not authenticated, cannot fetch data.")
             return None
-        response = requests.get(url, headers=self.headers)
+        headers = self.base_headers if not league_headers else self.headers
+        response = requests.get(url, headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
