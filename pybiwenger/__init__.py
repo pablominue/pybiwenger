@@ -3,6 +3,7 @@
 import os
 
 from pybiwenger.src.biwenger.market import Market
+from pybiwenger.src.biwenger.players import Players
 from pybiwenger.src.client.client import BiwengerBaseClient
 from pybiwenger.utils.log import PabLog
 

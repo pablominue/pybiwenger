@@ -37,6 +37,7 @@ class BiwengerBaseClient:
             "X-Lang": "es",
             "Authorization": self.auth,
         }
+        self.get_account_info()
 
     def _refresh_token(self) -> t.Optional[str]:
         lg.log.info("Login process")
@@ -57,11 +58,14 @@ class BiwengerBaseClient:
         else:
             raise BiwengerAuthError("Login failed, check your credentials.")
 
-    def get_account_info(self):
-
+    def get_account_info(self, league_name: t.Optional[str] = None) -> None:
         result = requests.get(url_account, headers=self.headers).json()
         if result["status"] == 200:
             lg.log.info("call login ok!")
+        if league_name is not None:
+            os.environ["BIWENGER_LEAGUE_NAME"] = league_name
+        else:
+            os.environ["BIWENGER_LEAGUE_NAME"] = result['data']['leagues'][0]['name']
         league_info = [
             x
             for x in result["data"]["leagues"]
@@ -69,7 +73,8 @@ class BiwengerBaseClient:
         ][0]
         id_league = league_info["id"]
         id_user = league_info["user"]["id"]
-        headers_league = {
+        lg.log.info("Updating Headers with league and user info")
+        self.headers = {
             "Content-type": "application/json",
             "Accept": "application/json, text/plain, */*",
             "X-Lang": "es",
@@ -77,22 +82,17 @@ class BiwengerBaseClient:
             "X-User": repr(id_user),
             "Authorization": self.auth,
         }
+        print(self.headers)
         if result["status"] == 200:
             lg.log.info("call login ok!")
-            return result, headers_league
+            return
 
     @retry(tries=3, delay=2)
     def fetch(self, url: str) -> t.Optional[dict]:
         if not self.authenticated or self.auth is None:
             lg.log.info("Not authenticated, cannot fetch data.")
             return None
-        headers = {
-            "Content-type": "application/json",
-            "Accept": "application/json, text/plain, */*",
-            "X-Lang": "es",
-            "Authorization": self.auth,
-        }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
             return response.json()
         else:
