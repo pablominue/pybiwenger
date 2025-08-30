@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from typing import Any, DefaultDict, Dict, Iterable, List, Optional, Union
+from datetime import datetime, timezone
+from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
+                    Union)
 
 from pydantic import BaseModel, Field
 
@@ -80,3 +82,103 @@ class PlayersAPI(BiwengerBaseClient):
 
     def get_team_ids(self, owner_id: int) -> List[int]:
         return [int(p["id"]) for p in self.get_user_players_raw(owner_id)]
+
+    def _catalog_url_for(
+        self, competition: str, score: int, season: Optional[int] = None
+    ) -> str:
+        base = f"https://cf.biwenger.com/api/v2/competitions/{competition}/data"
+        qs = {"lang": "es", "score": str(score)}
+        if season is not None:
+            qs["season"] = str(season)
+        from urllib.parse import urlencode
+
+        return f"{base}?{urlencode(qs)}"
+
+    def _fetch_competition_catalog(
+        self, competition: str, score: int, season: Optional[int] = None
+    ) -> Dict[str, Any]:
+        url = self._catalog_url_for(competition, score, season)
+        data = self.fetch(url) or {}
+        return (data.get("data") or {}).get("players", {})
+
+    def _now_ts(self) -> int:
+        return int(datetime.now(timezone.utc).timestamp())
+
+    def get_player_history(
+        self,
+        player: Player,
+        competition: str = "la-liga",
+        score: int = 5,
+        seasons: Optional[List[int]] = None,
+        include_board_events: bool = False,
+    ) -> Dict[str, List[Tuple[int, Any]]]:
+        """
+        Devuelve series históricas aproximadas para un jugador:
+          - points: lista de (timestamp|jornada_index, value)
+          - price: lista de (timestamp, price)
+        Nota: price requiere snapshots persistidos para historia real; si no existen,
+        solo devuelve el snapshot actual. points recientes se infieren de fitness.
+        """
+        history: Dict[str, List[Tuple[int, Any]]] = {"points": [], "price": []}
+
+        cat_now = self._fetch_competition_catalog(competition, score, season=None)
+        raw = cat_now.get(str(player.id))
+        ts_now = self._now_ts()
+        if raw:
+            if "price" in raw:
+                history["price"].append((ts_now, raw["price"]))
+
+            fitness = raw.get("fitness") or []
+            for idx, v in enumerate(fitness):
+                if isinstance(v, (int, float)) and v is not None:
+                    history["points"].append((idx, v))
+            if "pointsLastSeason" in raw and raw["pointsLastSeason"] is not None:
+                history["points"].append(
+                    (-9999, {"points_last_season": raw["pointsLastSeason"]})
+                )
+
+        if seasons:
+            for season in seasons:
+                cat_season = self._fetch_competition_catalog(
+                    competition, score, season=season
+                )
+                r = cat_season.get(str(player.id))
+                if not r:
+                    continue
+                if "points" in r and r["points"] is not None:
+                    history["points"].append((season, {"points_total": r["points"]}))
+                if "pointsLastSeason" in r and r["pointsLastSeason"] is not None:
+                    history["points"].append(
+                        (season - 1, {"points_total": r["pointsLastSeason"]})
+                    )
+                if "price" in r and r["price"] is not None:
+                    history["price"].append((season, r["price"]))
+
+        if include_board_events:
+            board_url = f"https://biwenger.as.com/api/v2/league/{self.account.leagues.id}/board?type=transfer,market"
+            board = self.fetch(board_url) or {}
+            events = (board.get("data") or {}).get("events", []) or (
+                board.get("data") or {}
+            ).get("board", [])
+            for ev in events:
+                ev_player = (
+                    (ev.get("player") or {}).get("id")
+                    if isinstance(ev.get("player"), dict)
+                    else ev.get("player")
+                )
+                if ev_player == player.id:
+                    tstamp = (
+                        ev.get("date")
+                        or ev.get("ts")
+                        or ev.get("time")
+                        or self._now_ts()
+                    )
+                    history["price"].append(
+                        (int(tstamp), {"event": ev.get("type", "board")})
+                    )
+
+        history["points"].sort(key=lambda x: x)
+        history["price"].sort(
+            key=lambda x: (isinstance(x, int), x if isinstance(x, int) else 0)
+        )
+        return history
