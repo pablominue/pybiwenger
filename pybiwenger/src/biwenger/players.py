@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
+import typing as t
 from collections import defaultdict
 from datetime import datetime, timezone
 from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
                     Union)
 
 from pydantic import BaseModel, Field
-import typing as t
 
 from pybiwenger.src.client import BiwengerBaseClient
 from pybiwenger.types.player import Player
@@ -43,7 +43,7 @@ class PlayersAPI(BiwengerBaseClient):
             cat = self.fetch(self._catalog_url)
             self._catalog = (cat or {}).get("data", {}).get("players", {})
         return self._catalog
-    
+
     def get_all_players(self) -> t.Iterable[Player]:
         catalog = self.__get_catalog()
         return [Player.model_validate(player) for player in catalog.values()]

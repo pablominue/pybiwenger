@@ -5,18 +5,16 @@ Provides access to league information and users.
 
 import json
 import typing as t
+from typing import Any, Dict, Iterable, List
 
 from pydantic import BaseModel
 
 from pybiwenger.src.client import BiwengerBaseClient
 from pybiwenger.src.client.urls import url_all_players, url_league
 from pybiwenger.types.account import AccountData
-from pybiwenger.types.user import User, Standing
-from pybiwenger.utils.log import PabLog
-
-from typing import Iterable, Dict, Any, List
-import json
 from pybiwenger.types.player import Player
+from pybiwenger.types.user import Standing, User
+from pybiwenger.utils.log import PabLog
 
 
 class LeagueAPI(BiwengerBaseClient):
@@ -39,7 +37,6 @@ class LeagueAPI(BiwengerBaseClient):
         ]
         return users
 
-    
     def get_classification(self) -> List[Standing]:
         """Clasificación actual de la liga (posición y puntos por usuario)."""
         data = self.fetch(self._league_url) or {}
