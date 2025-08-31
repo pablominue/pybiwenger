@@ -9,7 +9,7 @@ from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
 from pydantic import BaseModel, Field
 
 from pybiwenger.src.client import BiwengerBaseClient
-from pybiwenger.types.player import Player  # tu modelo completo
+from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
 from pybiwenger.utils.log import PabLog
 
@@ -19,7 +19,7 @@ lg = PabLog(__name__)
 class PlayersAPI(BiwengerBaseClient):
     def __init__(self) -> None:
         super().__init__()
-        self.league_id = self.account.leagues.id
+        self.league_id = self.account.leagues
         self._users_players_url = (
             "https://biwenger.as.com/api/v2/user?fields=players(id,owner)"
         )

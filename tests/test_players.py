@@ -1,9 +1,12 @@
-from pybiwenger.src.biwenger.players import PlayersAPI, Player
+import dotenv
+
+from pybiwenger.src.biwenger.players import Player, PlayersAPI
 from tests.data import PLAYERS
 
-players = [
-    Player(player)
-    for player in PLAYERS
-]
+dotenv.load_dotenv()
 
-print(players)
+import pybiwenger
+
+pybiwenger.authenticate()
+
+print(pybiwenger.PlayersAPI().user_league)

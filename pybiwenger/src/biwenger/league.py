@@ -29,7 +29,6 @@ class LeagueAPI(BiwengerBaseClient):
             Iterable[User]: List of users in the league.
         """
         data = self.fetch(self._league_url)["data"]
-        print(data)
         users = [
             User.model_validate_json(json.dumps(player))
             for player in data.get("users", [])

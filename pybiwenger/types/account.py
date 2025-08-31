@@ -2,6 +2,8 @@ from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
+from pybiwenger.types.user import User
+
 
 class Device(BaseModel):
     type: str
@@ -31,7 +33,7 @@ class UserStatus(BaseModel):
     bids: int
 
 
-class LeagueUser(BaseModel):
+class CurrentUser(BaseModel):
     id: int
     name: str
     balance: int
@@ -43,6 +45,9 @@ class LeagueUser(BaseModel):
     favorites: List[Any]
     points: int
     position: int
+
+    def to_user(self) -> User:
+        return User(id=self.id, name=self.name, icon=self.icon)
 
 
 class LeagueSettings(BaseModel):
@@ -98,7 +103,7 @@ class League(BaseModel):
     created: int
     icon: str
     cover: str
-    user: LeagueUser
+    user: CurrentUser
     settings: LeagueSettings
     upgrades: Upgrades
 
