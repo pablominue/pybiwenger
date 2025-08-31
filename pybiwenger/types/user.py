@@ -5,6 +5,9 @@ from pydantic import BaseModel
 from pybiwenger.types.player import Player
 
 
+from dataclasses import dataclass
+
+
 class User(BaseModel):
     id: int
     name: str
@@ -20,3 +23,11 @@ class User(BaseModel):
 class Team(BaseModel):
     owner: User
     players: t.List[Player]
+
+
+@dataclass
+class Standing:
+    user_id: int
+    name: str
+    points: int
+    position: int

@@ -7,7 +7,7 @@ class Player(BaseModel):
     id: int
     name: str
     slug: str
-    team_id: int = Field(alias="teamID", default=0)
+    team_id: t.Optional[int] = Field(alias="teamID", default=0)
     position: int
     price: float
     fantasy_price: float = Field(alias="fantasyPrice", default=0)
