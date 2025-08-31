@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pybiwenger"
-version = "0.3.0"
+version = "0.3.1"
 description = "A python package to interact with the Soccer Fantasy Game Biwenger"
 authors = ["Pablo Minue"]
 license = "MIT"
