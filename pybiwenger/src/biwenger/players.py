@@ -7,9 +7,10 @@ from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
                     Union)
 
 from pydantic import BaseModel, Field
+import typing as t
 
 from pybiwenger.src.client import BiwengerBaseClient
-from pybiwenger.types.player import Player  # tu modelo completo
+from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
 from pybiwenger.utils.log import PabLog
 
@@ -19,7 +20,7 @@ lg = PabLog(__name__)
 class PlayersAPI(BiwengerBaseClient):
     def __init__(self) -> None:
         super().__init__()
-        self.league_id = self.account.leagues.id
+        self.league_id = self.account.leagues[0].id
         self._users_players_url = (
             "https://biwenger.as.com/api/v2/user?fields=players(id,owner)"
         )
@@ -30,18 +31,22 @@ class PlayersAPI(BiwengerBaseClient):
         self._catalog = None
         self._users_index = None
 
-    def get_users_players_raw(self) -> List[Dict[str, Any]]:
+    def __get_users_players_raw(self) -> List[Dict[str, Any]]:
         data = self.fetch(self._users_players_url)
         return (data or {}).get("data", {}).get("players", [])
 
-    def get_user_players_raw(self, owner_id: int) -> List[Dict[str, Any]]:
-        return [p for p in self.get_users_players_raw() if p.get("owner") == owner_id]
+    def __get_user_players_raw(self, owner_id: int) -> List[Dict[str, Any]]:
+        return [p for p in self.__get_users_players_raw() if p.get("owner") == owner_id]
 
-    def get_catalog(self) -> Dict[str, Dict[str, Any]]:
+    def __get_catalog(self) -> Dict[str, Dict[str, Any]]:
         if self._catalog is None:
             cat = self.fetch(self._catalog_url)
             self._catalog = (cat or {}).get("data", {}).get("players", {})
         return self._catalog
+    
+    def get_all_players(self) -> t.Iterable[Player]:
+        catalog = self.__get_catalog()
+        return [Player.model_validate(player) for player in catalog.values()]
 
     def get_league_users(self) -> List[User]:
         data = self.fetch(self._league_url) or {}
@@ -54,7 +59,7 @@ class PlayersAPI(BiwengerBaseClient):
         return self._users_index
 
     def _enrich_player(self, pid: int) -> Player:
-        cat = self.get_catalog()
+        cat = self.__get_catalog()
         raw = cat.get(str(pid), {}) | {"id": pid}
         return Player.model_validate(raw)
 
@@ -64,12 +69,12 @@ class PlayersAPI(BiwengerBaseClient):
             return Team(
                 owner=User(id=owner_id, name=str(owner_id), icon=""), players=[]
             )
-        player_ids = [int(p["id"]) for p in self.get_user_players_raw(owner_id)]
+        player_ids = [int(p["id"]) for p in self.__get_user_players_raw(owner_id)]
         players = [self._enrich_player(pid) for pid in player_ids]
         return Team(owner=owner, players=players)
 
     def get_rosters_by_owner(self) -> Dict[User, List[Player]]:
-        pairs = self.get_users_players_raw()
+        pairs = self.__get_users_players_raw()
         by_owner: DefaultDict[int, List[int]] = defaultdict(list)
         for p in pairs:
             by_owner[p["owner"]].append(int(p["id"]))
@@ -81,12 +86,12 @@ class PlayersAPI(BiwengerBaseClient):
         return result
 
     def get_team_ids(self, owner_id: int) -> List[int]:
-        return [int(p["id"]) for p in self.get_user_players_raw(owner_id)]
+        return [int(p["id"]) for p in self.__get_user_players_raw(owner_id)]
 
     def _catalog_url_for(
         self, competition: str, score: int, season: Optional[int] = None
     ) -> str:
-        base = f"https://cf.biwenger.com/api/v2/competitions/{competition}/data"
+        base = f"https://biwenger.as.com/api/v2/competitions/{competition}/data"
         qs = {"lang": "es", "score": str(score)}
         if season is not None:
             qs["season"] = str(season)

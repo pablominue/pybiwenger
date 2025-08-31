@@ -13,6 +13,9 @@ from retry import retry
 
 from pybiwenger.src.client.urls import url_account, url_login
 from pybiwenger.types.account import *
+from pybiwenger.types.player import Player
+from pybiwenger.types.user import Team, User
+from pybiwenger.types.account import League
 from pybiwenger.utils.log import PabLog
 
 lg = PabLog(__name__)
@@ -21,6 +24,10 @@ lg = PabLog(__name__)
 class BiwengerAuthError(Exception):
     """Custom exception for Biwenger authentication errors."""
 
+    pass
+
+
+class BiwengerError(Exception):
     pass
 
 
@@ -40,7 +47,7 @@ class BiwengerBaseClient:
         self.authenticated = False
         self.auth: t.Optional[str] = None
         self.token: t.Optional[str] = None
-        self._refresh_token()
+        self.__refresh_token()
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -50,9 +57,61 @@ class BiwengerBaseClient:
                 "Authorization": self.auth,
             }
         )
-        self.account: AccountData = self._get_account_info()
+        self.account: AccountData = self.__get_account_info()
 
-    def _refresh_token(self) -> None:
+    @property
+    def user_league(self) -> League:
+        return self.account.leagues
+
+    @user_league.setter
+    def user_league(self) -> None:
+        return BiwengerError("User League can not be overwriteen")
+
+    @property
+    def user(self):
+        return self.account.leagues[0].user.to_user()
+
+    @user.setter
+    def user(self) -> None:
+        return BiwengerError("User can not be overwriteen")
+
+    @property
+    def user_team(self) -> Team:
+        owner = self.user
+        players = self._get_my_players_enriched()
+        return Team(owner=owner, players=players)
+
+    @user_team.setter
+    def user_team(self) -> None:
+        return BiwengerError("User League can not be overwriteen")
+
+    def __get_my_player_ids(self) -> list[int]:
+        url = "https://biwenger.as.com/api/v2/user"
+        data = self.fetch(f"{url}?fields=players(id,owner)") or {}
+        players = (data.get("data") or {}).get("players", [])
+        return [int(p["id"]) for p in players]
+
+    def __get_catalog(self, competition: t.Optional[str] = "la-liga") -> dict[str, dict]:
+        url = f"https://biwenger.as.com/api/v2/competitions/{competition}/data"
+        cat = self.fetch(f"{url}?lang=es&score=5")
+        return (cat or {}).get("data", {}).get("players", {})
+
+    def __get_my_players_enriched(self) -> list[Player]:
+        my_ids = self.__get_my_player_ids()
+        catalog = self.__get_catalog()
+
+        players = []
+        for pid in my_ids:
+            raw = catalog.get(str(pid))
+            if raw:
+                raw["id"] = pid
+                players.append(Player.model_validate(raw))
+            else:
+                players.append(Player(id=pid, name=f"Unknown_{pid}"))
+
+        return players
+
+    def __refresh_token(self) -> None:
         """Refreshes the authentication token by logging in to the Biwenger API.
 
         Raises:
@@ -77,7 +136,7 @@ class BiwengerBaseClient:
         else:
             raise BiwengerAuthError("Login failed, check your credentials.")
 
-    def _get_account_info(self, league_name: t.Optional[str] = None) -> AccountData:
+    def __get_account_info(self, league_name: t.Optional[str] = None) -> AccountData:
         """Fetches account information from the Biwenger API.
 
         Args:

@@ -11,8 +11,12 @@ from pydantic import BaseModel
 from pybiwenger.src.client import BiwengerBaseClient
 from pybiwenger.src.client.urls import url_all_players, url_league
 from pybiwenger.types.account import AccountData
-from pybiwenger.types.user import User
+from pybiwenger.types.user import User, Standing
 from pybiwenger.utils.log import PabLog
+
+from typing import Iterable, Dict, Any, List
+import json
+from pybiwenger.types.player import Player
 
 
 class LeagueAPI(BiwengerBaseClient):
@@ -29,9 +33,32 @@ class LeagueAPI(BiwengerBaseClient):
             Iterable[User]: List of users in the league.
         """
         data = self.fetch(self._league_url)["data"]
-        print(data)
         users = [
             User.model_validate_json(json.dumps(player))
             for player in data.get("users", [])
         ]
         return users
+
+    
+    def get_classification(self) -> List[Standing]:
+        """Clasificación actual de la liga (posición y puntos por usuario)."""
+        data = self.fetch(self._league_url) or {}
+        league = data.get("data") or {}
+        # En muchas respuestas, los usuarios traen puntos y posición actuales
+        users = league.get("users", [])  # verificar estructura real en tu respuesta
+        standings: List[Standing] = []
+        for u in users:
+            standings.append(
+                Standing(
+                    user_id=u.get("id"),
+                    name=u.get("name"),
+                    points=u.get("points", 0),
+                    position=u.get("position", 0),
+                )
+            )
+        # Si no vienen puntos/posición aquí, consultar rounds/league
+        if not any(s.points for s in standings):
+            rounds = self.fetch("https://biwenger.as.com/api/v2/rounds/league") or {}
+            # Adaptar a la estructura real de la respuesta de rounds
+            # ...
+        return sorted(standings, key=lambda s: s.position or 9999)
