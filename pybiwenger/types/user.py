@@ -1,11 +1,9 @@
 import typing as t
+from dataclasses import dataclass
 
 from pydantic import BaseModel
 
 from pybiwenger.types.player import Player
-
-
-from dataclasses import dataclass
 
 
 class User(BaseModel):

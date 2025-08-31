@@ -13,9 +13,9 @@ from retry import retry
 
 from pybiwenger.src.client.urls import url_account, url_login
 from pybiwenger.types.account import *
+from pybiwenger.types.account import League
 from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
-from pybiwenger.types.account import League
 from pybiwenger.utils.log import PabLog
 
 lg = PabLog(__name__)
@@ -91,7 +91,9 @@ class BiwengerBaseClient:
         players = (data.get("data") or {}).get("players", [])
         return [int(p["id"]) for p in players]
 
-    def __get_catalog(self, competition: t.Optional[str] = "la-liga") -> dict[str, dict]:
+    def __get_catalog(
+        self, competition: t.Optional[str] = "la-liga"
+    ) -> dict[str, dict]:
         url = f"https://biwenger.as.com/api/v2/competitions/{competition}/data"
         cat = self.fetch(f"{url}?lang=es&score=5")
         return (cat or {}).get("data", {}).get("players", {})
