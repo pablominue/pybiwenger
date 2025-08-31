@@ -10,6 +10,8 @@ from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
 from pydantic import BaseModel, Field
 
 from pybiwenger.src.client import BiwengerBaseClient
+from pybiwenger.src.client.urls import (url_catalog, url_competitions,
+                                        url_league, url_user_players)
 from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
 from pybiwenger.utils.log import PabLog
@@ -21,13 +23,9 @@ class PlayersAPI(BiwengerBaseClient):
     def __init__(self) -> None:
         super().__init__()
         self.league_id = self.account.leagues[0].id
-        self._users_players_url = (
-            "https://biwenger.as.com/api/v2/user?fields=players(id,owner)"
-        )
-        self._catalog_url = (
-            "https://biwenger.as.com/api/v2/competitions/la-liga/data?lang=es&score=5"
-        )
-        self._league_url = f"https://biwenger.as.com/api/v2/league/{self.league_id}"
+        self._users_players_url = url_user_players
+        self._catalog_url = url_catalog
+        self._league_url = url_league + self.league_id
         self._catalog = None
         self._users_index = None
 
@@ -91,7 +89,7 @@ class PlayersAPI(BiwengerBaseClient):
     def _catalog_url_for(
         self, competition: str, score: int, season: Optional[int] = None
     ) -> str:
-        base = f"https://biwenger.as.com/api/v2/competitions/{competition}/data"
+        base = url_competitions + f"{competition}/data"
         qs = {"lang": "es", "score": str(score)}
         if season is not None:
             qs["season"] = str(season)
@@ -160,7 +158,9 @@ class PlayersAPI(BiwengerBaseClient):
                     history["price"].append((season, r["price"]))
 
         if include_board_events:
-            board_url = f"https://biwenger.as.com/api/v2/league/{self.account.leagues.id}/board?type=transfer,market"
+            board_url = (
+                url_league + f"{self.account.leagues.id}/board?type=transfer,market"
+            )
             board = self.fetch(board_url) or {}
             events = (board.get("data") or {}).get("events", []) or (
                 board.get("data") or {}

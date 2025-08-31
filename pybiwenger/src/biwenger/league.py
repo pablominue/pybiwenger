@@ -10,7 +10,7 @@ from typing import Any, Dict, Iterable, List
 from pydantic import BaseModel
 
 from pybiwenger.src.client import BiwengerBaseClient
-from pybiwenger.src.client.urls import url_all_players, url_league
+from pybiwenger.src.client.urls import url_league, url_rounds
 from pybiwenger.types.account import AccountData
 from pybiwenger.types.player import Player
 from pybiwenger.types.user import Standing, User
@@ -55,7 +55,7 @@ class LeagueAPI(BiwengerBaseClient):
             )
         # Si no vienen puntos/posición aquí, consultar rounds/league
         if not any(s.points for s in standings):
-            rounds = self.fetch("https://biwenger.as.com/api/v2/rounds/league") or {}
+            rounds = self.fetch(url_rounds) or {}
             # Adaptar a la estructura real de la respuesta de rounds
             # ...
         return sorted(standings, key=lambda s: s.position or 9999)

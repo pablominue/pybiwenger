@@ -15,7 +15,6 @@ from pybiwenger.utils.log import PabLog
 lg = PabLog(__name__)
 
 
-
 def authenticate(
     username: t.Optional[str] = None, password: t.Optional[str] = None
 ) -> None:

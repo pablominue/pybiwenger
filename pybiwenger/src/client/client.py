@@ -11,7 +11,8 @@ import requests
 from pydantic import BaseModel
 from retry import retry
 
-from pybiwenger.src.client.urls import url_account, url_login
+from pybiwenger.src.client.urls import (url_account, url_competitions,
+                                        url_login, url_user)
 from pybiwenger.types.account import *
 from pybiwenger.types.account import League
 from pybiwenger.types.player import Player
@@ -86,7 +87,7 @@ class BiwengerBaseClient:
         return BiwengerError("User League can not be overwriteen")
 
     def __get_my_player_ids(self) -> list[int]:
-        url = "https://biwenger.as.com/api/v2/user"
+        url = url_user
         data = self.fetch(f"{url}?fields=players(id,owner)") or {}
         players = (data.get("data") or {}).get("players", [])
         return [int(p["id"]) for p in players]
@@ -94,7 +95,7 @@ class BiwengerBaseClient:
     def __get_catalog(
         self, competition: t.Optional[str] = "la-liga"
     ) -> dict[str, dict]:
-        url = f"https://biwenger.as.com/api/v2/competitions/{competition}/data"
+        url = url_competitions + f"{competition}/data"
         cat = self.fetch(f"{url}?lang=es&score=5")
         return (cat or {}).get("data", {}).get("players", {})
 
