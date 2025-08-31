@@ -1,6 +1,6 @@
 # pybiwenger
 
-![pybiwenger logo](https://github.com/pablominue/pybiwenger/blob/main/image.jpg?raw=true)
+![pybiwenger logo](https://github.com/pablominue/pybiwenger/blob/main/logo.jpg?raw=true)
 
 **pybiwenger** is a Python library for interacting with the [Biwenger](https://biwenger.as.com/) Soccer Fantasy Game API. It provides convenient access to your account, league, market, and player data, enabling automation and analysis for Biwenger users.
 
