@@ -59,6 +59,12 @@ class BiwengerBaseClient:
             }
         )
         self.account: AccountData = self.__get_account_info()
+        self.cf_session = requests.Session()
+        self.cf_session.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+            "Accept-Language": "es-ES,es;q=0.9",
+            "Accept": "application/json, text/javascript, */*; q=0.01"
+        }
 
     @property
     def user_league(self) -> League:
@@ -198,3 +204,14 @@ class BiwengerBaseClient:
             )
             lg.log.error(f"Response: {response.text}")
             return None
+
+    @retry(tries=3, delay=2)
+    def fetch_cf(self, url: str, params: t.Optional[dict[str, t.Any]] = None, *args, **kwargs) -> t.Optional[dict]:
+        # For a URL like this; URL = "https://cf.biwenger.com/api/v2/players/la-liga/vinicius-junior/?lang=es&season=2025&fields=*%2Cprices"
+        # URL = https://cf.biwenger.com/api/v2/players/la-liga/vinicius-junior
+        # params = {
+        #     "lang": "es",
+        #     "season": 2025,
+        #     "fields": "*,prices"
+        # }
+        return self.cf_session.get(url=url, params=params *args, **kwargs)
