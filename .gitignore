@@ -4,3 +4,6 @@ __pycache__/
 .env
 test_pablo.py
 diego_tests.py
+.vscode
+
+.pytest_cache
