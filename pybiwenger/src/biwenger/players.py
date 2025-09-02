@@ -25,7 +25,7 @@ class PlayersAPI(BiwengerBaseClient):
         self.league_id = self.account.leagues[0].id
         self._users_players_url = url_user_players
         self._catalog_url = url_catalog
-        self._league_url = url_league + self.league_id
+        self._league_url = url_league[0] + str(self.league_id)
         self._catalog = None
         self._users_index = None
 
@@ -89,7 +89,7 @@ class PlayersAPI(BiwengerBaseClient):
     def _catalog_url_for(
         self, competition: str, score: int, season: Optional[int] = None
     ) -> str:
-        base = url_competitions + f"{competition}/data"
+        base = url_competitions + "/" + f"{competition}/data"
         qs = {"lang": "es", "score": str(score)}
         if season is not None:
             qs["season"] = str(season)
