@@ -7,9 +7,12 @@ from pybiwenger.src.biwenger.league import LeagueAPI
 from pybiwenger.src.biwenger.market import MarketAPI
 from pybiwenger.src.biwenger.players import PlayersAPI
 from pybiwenger.src.client.client import BiwengerBaseClient
+from pybiwenger.types.account import *
 from pybiwenger.types.account import (AccountData, AccountModel, CurrentUser,
                                       Device, League, LeagueSettings, Location,
                                       UpgradePlan, Upgrades, UserStatus)
+from pybiwenger.types.player import Player, players_to_polars
+from pybiwenger.types.user import Standing, User
 from pybiwenger.utils.log import PabLog
 
 lg = PabLog(__name__)
