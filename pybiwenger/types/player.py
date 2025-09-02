@@ -1,5 +1,6 @@
 import typing as t
 
+import polars as pl
 from pydantic import BaseModel, Field
 
 
@@ -22,3 +23,13 @@ class Player(BaseModel):
     points_home: float = Field(alias="pointsHome", default=0)
     points_away: float = Field(alias="pointsAway", default=0)
     points_last_season: t.Optional[int] = Field(alias="pointsLastSeason", default=0)
+
+    def to_polars(self) -> pl.Series:
+        print(self.model_json_schema())
+        data = {k: [v] for k, v in self.dict().items()}
+        schema = {k: type(k) for k in self.dict().keys()}
+        return pl.DataFrame(data, schema=schema, strict=False)
+
+
+def players_to_polars(players: t.Iterable[Player]) -> pl.DataFrame:
+    return pl.concat([player.to_polars() for player in players])
