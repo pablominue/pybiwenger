@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from pybiwenger.src.client import BiwengerBaseClient
 from pybiwenger.src.client.urls import (url_catalog, url_competitions,
-                                        url_league, url_user_players)
+                                        url_league, url_user_players, url_points_history)
 from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
 from pybiwenger.utils.log import PabLog
@@ -187,3 +187,13 @@ class PlayersAPI(BiwengerBaseClient):
             key=lambda x: (isinstance(x, int), x if isinstance(x, int) else 0)
         )
         return history
+
+    def get_points_history(self,
+                       player: Player,
+                       season: str) -> str :
+       
+        slug = player.slug
+        url_points_history_player_season = url_points_history.replace("{playe_slug}", slug).replace("{yyyy}", season)
+        cat_now = self.fetch(url_points_history_player_season)
+        #raw = cat_now.get()
+        return ""
