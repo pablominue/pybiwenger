@@ -214,4 +214,16 @@ class BiwengerBaseClient:
         #     "season": 2025,
         #     "fields": "*,prices"
         # }
-        return self.cf_session.get(url=url, params=params *args, **kwargs)
+
+        if not self.authenticated or self.auth is None:
+            lg.log.info("Not authenticated, cannot fetch data.")
+            return None
+        response = requests.get(url, headers=self.cf_session.headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            lg.log.error(
+                f"Failed to fetch data from {url}, status code: {response.status_code}"
+            )
+            lg.log.error(f"Response: {response.text}")
+            return None
