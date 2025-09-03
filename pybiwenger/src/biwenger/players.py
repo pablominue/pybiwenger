@@ -200,7 +200,7 @@ class PlayersAPI(BiwengerBaseClient):
         raw_reports = cat_now.get("data").get("reports")
 
         parsing = Parsing()
-        info_to_get = ["status","home","match.round.home.slug","match.round.away.slug", "rawStats.roundPhase", "rawStats.homeScore", "rawStats.awayScore", "rawStats.minuesPlayed", "rawStats.picas", "rawStats.sofascore", "rawStats.score5", "events"]
-        flatted_info = parsing.extract_info(data = raw_reports, paths = info_to_get)
-
+        info_to_get = ["status.status","home","match.home.slug","match.away.slug", "rawStats.roundPhase", "rawStats.homeScore", "rawStats.awayScore", "rawStats.minuesPlayed", "rawStats.picas", "rawStats.sofascore", "rawStats.score5", "events"]
+        flatted_info = parsing.extract_and_flatten_dict(data = raw_reports, paths = info_to_get)
+        
         return flatted_info
