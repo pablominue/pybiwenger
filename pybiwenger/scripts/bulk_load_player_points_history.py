@@ -28,5 +28,5 @@ for player in all_players:
         path_specific = path + f"{player.slug}-{year}.csv"
         Exporting.exporting_list_dicts_to_csv(renamed_enriched_info, path_specific)
 
-        time.sleep(random.uniform(1, 1.25)) #Para que no se enfaden los señores de Biwenger 🥺👉👈
+        time.sleep(random.uniform(1, 1.5)) #Para que no se enfaden los señores de Biwenger 🥺👉👈
 
