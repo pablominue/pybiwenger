@@ -11,8 +11,6 @@ import requests
 from pydantic import BaseModel
 from retry import retry
 
-from proxy_requests import ProxyRequests
-
 from pybiwenger.src.client.urls import (url_account, url_competitions,
                                         url_login, url_user)
 from pybiwenger.types.account import *
@@ -226,20 +224,3 @@ class BiwengerBaseClient:
             )
             lg.log.error(f"Response: {response.text}")
             return None
-        
-    @retry(tries=3, delay=2)
-    def fetch_proxy_cf(self, url: str, params: t.Optional[dict[str, t.Any]] = None, *args, **kwargs) -> t.Optional[dict]:
-        # Same as fetch_cf but using public proxies
-        # No parece que tire, no lo he probado mucho
-
-        r = ProxyRequests(url)
-        r.set_headers(self.cf_session.headers)
-        response = r.get_with_headers()
-        if response.status_code == 200:
-            return response.json()
-        else:
-            lg.log.error(
-                f"Failed to fetch data from {url}, status code: {response.status_code}"
-            )
-            lg.log.error(f"Response: {response.text}")
-            return None    

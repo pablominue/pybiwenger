@@ -505,20 +505,6 @@ xlsx2csv = ["xlsx2csv (>=0.8.0)"]
 xlsxwriter = ["xlsxwriter"]
 
 [[package]]
-name = "proxy-requests"
-version = "0.5.2"
-description = "Make HTTP requests with scraped proxies"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "proxy_requests-0.5.2.tar.gz", hash = "sha256:2ee375e559eeb5fc698cd316074d4d10a9c77bb3e4902f010e2512ad032a3d67"},
-]
-
-[package.dependencies]
-requests = "*"
-
-[[package]]
 name = "py"
 version = "1.11.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
@@ -861,4 +847,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "205d0f4eede0d11629e2767190821abec67018a3cc798a85a031d8d3a179bd65"
+content-hash = "deab9a10c54688ef9fedbcacd7bae5b8b9181c59463558f8a566dc32dfa45c93"

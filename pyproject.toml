@@ -16,7 +16,6 @@ retry = "^0.9.2"
 pydantic = "^2.11.7"
 dotenv = "^0.9.9"
 polars = "^1.33.0"
-proxy-requests = "^0.5.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
