@@ -65,6 +65,13 @@ class BiwengerBaseClient:
             "Accept-Language": "es-ES,es;q=0.9",
             "Accept": "application/json, text/javascript, */*; q=0.01"
         }
+        if os.getenv("BIWENGER_PROXY"):
+            self.proxy = {
+                "http": os.getenv("BIWENGER_PROXY"),
+                "https": os.getenv("BIWENGER_PROXY")
+            }
+        else:
+            self.proxy = None    
 
     @property
     def user_league(self) -> League:
@@ -215,7 +222,7 @@ class BiwengerBaseClient:
         #     "fields": "*,prices"
         # }
 
-        response = requests.get(url, headers=self.cf_session.headers)
+        response = requests.get(url, headers=self.cf_session.headers, proxies = self.proxy)
         if response.status_code == 200:
             return response.json()
         else:
