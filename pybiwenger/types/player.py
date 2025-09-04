@@ -23,8 +23,6 @@ class Player(BaseModel):
     points_home: float = Field(alias="pointsHome", default=0)
     points_away: float = Field(alias="pointsAway", default=0)
     points_last_season: t.Optional[int] = Field(alias="pointsLastSeason", default=0)
-    points_history: t.Optional[str] = None #TODO correct type
-    price_history: t.Optional[str] = None #TODO correct type
 
     def to_polars(self) -> pl.Series:
         print(self.model_json_schema())
