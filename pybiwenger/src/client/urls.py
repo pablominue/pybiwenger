@@ -21,3 +21,10 @@ url_league = ("https://biwenger.as.com/api/v2/league/",)
 url_rounds = "https://biwenger.as.com/api/v2/rounds/league"
 url_competitions = "https://biwenger.as.com/api/v2/competitions"
 url_user = "https://biwenger.as.com/api/v2/user"
+
+url_cf_player_season = (
+    "https://cf.biwenger.com/api/v2/players/la-liga/{player_slug}?lang=es&season={yyyy}"
+)
+
+fields_price_history = "&fields=*,prices"
+fields_points_history = "&fields=*,reports(points,home,events,status(status,statusInfo),match(*,round,home,away)"

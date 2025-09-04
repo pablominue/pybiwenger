@@ -63,8 +63,15 @@ class BiwengerBaseClient:
         self.cf_session.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
             "Accept-Language": "es-ES,es;q=0.9",
-            "Accept": "application/json, text/javascript, */*; q=0.01"
+            "Accept": "application/json, text/javascript, */*; q=0.01",
         }
+        if os.getenv("BIWENGER_PROXY"):
+            self.proxy = {
+                "http": os.getenv("BIWENGER_PROXY"),
+                "https": os.getenv("BIWENGER_PROXY"),
+            }
+        else:
+            self.proxy = None
 
     @property
     def user_league(self) -> League:
@@ -206,7 +213,9 @@ class BiwengerBaseClient:
             return None
 
     @retry(tries=3, delay=2)
-    def fetch_cf(self, url: str, params: t.Optional[dict[str, t.Any]] = None, *args, **kwargs) -> t.Optional[dict]:
+    def fetch_cf(
+        self, url: str, params: t.Optional[dict[str, t.Any]] = None, *args, **kwargs
+    ) -> t.Optional[dict]:
         # For a URL like this; URL = "https://cf.biwenger.com/api/v2/players/la-liga/vinicius-junior/?lang=es&season=2025&fields=*%2Cprices"
         # URL = https://cf.biwenger.com/api/v2/players/la-liga/vinicius-junior
         # params = {
@@ -214,4 +223,15 @@ class BiwengerBaseClient:
         #     "season": 2025,
         #     "fields": "*,prices"
         # }
-        return self.cf_session.get(url=url, params=params *args, **kwargs)
+
+        response = requests.get(
+            url, headers=self.cf_session.headers, proxies=self.proxy
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            lg.log.error(
+                f"Failed to fetch data from {url}, status code: {response.status_code}"
+            )
+            lg.log.error(f"Response: {response.text}")
+            return None

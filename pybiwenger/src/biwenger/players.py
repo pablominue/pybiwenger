@@ -10,11 +10,13 @@ from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
 from pydantic import BaseModel, Field
 
 from pybiwenger.src.client import BiwengerBaseClient
-from pybiwenger.src.client.urls import (url_catalog, url_competitions,
+from pybiwenger.src.client.urls import (fields_points_history, url_catalog,
+                                        url_cf_player_season, url_competitions,
                                         url_league, url_user_players)
 from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
 from pybiwenger.utils.log import PabLog
+from pybiwenger.utils.parsing import Parsing
 
 lg = PabLog(__name__)
 
@@ -187,3 +189,36 @@ class PlayersAPI(BiwengerBaseClient):
             key=lambda x: (isinstance(x, int), x if isinstance(x, int) else 0)
         )
         return history
+
+    def get_points_history(self, player: Player, season: str) -> List[Dict]:
+
+        slug = player.slug
+        url_points_history_player_season = (
+            url_cf_player_season.replace("{player_slug}", slug).replace(
+                "{yyyy}", season
+            )
+            + fields_points_history
+        )
+        cat_now = self.fetch_cf(url_points_history_player_season)
+        raw_reports = cat_now.get("data").get("reports")
+
+        parsing = Parsing()
+        info_to_get = [
+            "status.status",
+            "home",
+            "match.home.slug",
+            "match.away.slug",
+            "rawStats.roundPhase",
+            "rawStats.homeScore",
+            "rawStats.awayScore",
+            "rawStats.minuesPlayed",
+            "rawStats.picas",
+            "rawStats.sofascore",
+            "rawStats.score5",
+            "events",
+        ]
+        flatted_info = parsing.extract_and_flatten_dict(
+            data=raw_reports, paths=info_to_get
+        )
+
+        return flatted_info
