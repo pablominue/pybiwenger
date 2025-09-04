@@ -12,7 +12,7 @@ os.environ["BIWENGER_LEAGUE"] = "SIMPS"
 players_api = PlayersAPI()
 all_players = players_api.get_all_players()
 
-my_user = "victu"  # Fill with your Linux user
+my_user = ""  # Fill with your Linux user
 
 path = f"/home/{my_user}/biwenger_players_history_data/"
 
