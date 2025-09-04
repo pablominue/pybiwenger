@@ -235,4 +235,5 @@ class PlayersAPI(BiwengerBaseClient):
         cat_now = self.fetch_cf(url_market_history_player_season)
         raw_prices = cat_now.get("data").get("prices")
         reformatted_prices = Parsing.reformat_market_history(raw_prices)
-        pass
+        
+        return reformatted_prices

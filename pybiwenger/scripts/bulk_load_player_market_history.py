@@ -19,8 +19,6 @@ path = f"/home/{my_user}/biwenger_players_market_data/"
 for player in all_players:
 
     market_history = players_api.get_market_history(player)
-    reformatted_market_history = Parsing.reformat_market_history(
-        market_history
-    )
+
     path_specific = path + f"{player.slug}.csv"
-    Exporting.exporting_list_dicts_to_csv(reformatted_market_history, path_specific)
+    Exporting.exporting_list_dicts_to_csv(market_history, path_specific)
