@@ -1,5 +1,6 @@
 import csv
-from typing import (Any, Dict, List)
+from typing import Any, Dict, List
+
 
 class Exporting:
 

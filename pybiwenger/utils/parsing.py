@@ -1,10 +1,14 @@
-from typing import (Any, Dict, List)
+from typing import Any, Dict, List
+
 from pybiwenger.types.player import Player
+
 
 class Parsing:
 
     @staticmethod
-    def extract_and_flatten_dict(data: List[Dict[str, Any]], paths: List[str], delimiter: str = '.') -> List[Dict[str, Any]]:
+    def extract_and_flatten_dict(
+        data: List[Dict[str, Any]], paths: List[str], delimiter: str = "."
+    ) -> List[Dict[str, Any]]:
         """
         Extract specified paths from a list of nested dictionaries and return a flat list of dictionaries.
 
@@ -36,9 +40,11 @@ class Parsing:
                 flat_list.append(flat_item)
 
         return flat_list
-    
+
     @staticmethod
-    def enrich_and_parse_points_history_info(data: List[Dict[str, Any]], player: Player, year: str) -> List[Dict[str, str]]:
+    def enrich_and_parse_points_history_info(
+        data: List[Dict[str, Any]], player: Player, year: str
+    ) -> List[Dict[str, str]]:
 
         def count_event_types(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             # The event types we're interested in
@@ -60,21 +66,21 @@ class Parsing:
                 item.update(counts)
 
             return data
-        
+
         season = {"season": year}
 
-        player_flatted_info = player.model_dump(include={"slug","position"})
+        player_flatted_info = player.model_dump(include={"slug", "position"})
         for d in data:
             d.update(player_flatted_info)
             d.update(season)
-    
+
         data = count_event_types(data)
-        
+
         for d in data:
-            d.pop('events', None)
+            d.pop("events", None)
 
         return data
-    
+
     @staticmethod
     def rename_points_history_dict(data: List[Dict[str, str]]) -> List[Dict[str, str]]:
         mapping = {
@@ -94,9 +100,9 @@ class Parsing:
             "event_type_7": "player_red_card",
             "event_type_8": "player_second_yellow",
             "position": "player_position",
-            "home": "is_player_home"
-            }
-        
+            "home": "is_player_home",
+        }
+
         for d in data:
             for old_key, new_key in mapping.items():
                 if old_key in d:
