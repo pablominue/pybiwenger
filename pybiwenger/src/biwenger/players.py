@@ -215,6 +215,7 @@ class PlayersAPI(BiwengerBaseClient):
             "rawStats.picas",
             "rawStats.sofascore",
             "rawStats.score5",
+            "rawStats.price",
             "events",
         ]
         flatted_info = parsing.extract_and_flatten_dict(
