@@ -10,7 +10,7 @@ from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
 from pydantic import BaseModel, Field
 
 from pybiwenger.src.client import BiwengerBaseClient
-from pybiwenger.src.client.urls import (fields_points_history, url_catalog,
+from pybiwenger.src.client.urls import (fields_price_history, fields_points_history, url_catalog,
                                         url_cf_player_season, url_competitions,
                                         url_league, url_user_players)
 from pybiwenger.types.player import Player
@@ -222,3 +222,17 @@ class PlayersAPI(BiwengerBaseClient):
         )
 
         return flatted_info
+
+
+    def get_market_history(self, player: Player, season: str = "2025") -> List[Dict]:
+        slug = player.slug
+        url_market_history_player_season = (
+            url_cf_player_season.replace("{player_slug}", slug).replace(
+                "{yyyy}", season
+            )
+            + fields_price_history
+        )
+        cat_now = self.fetch_cf(url_market_history_player_season)
+        raw_prices = cat_now.get("data").get("prices")
+        reformatted_prices = Parsing.reformat_market_history(raw_prices)
+        pass

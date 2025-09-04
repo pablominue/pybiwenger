@@ -109,3 +109,12 @@ class Parsing:
                     d[new_key] = d.pop(old_key)
 
         return data
+    
+    @staticmethod
+    def reformat_market_history(
+        data: List[List[str]]
+    ) -> List[Dict[str, str]]:
+
+        result = [{"date_yyMMdd": d[0], "price": d[1]} for d in data]    
+
+        return result        
