@@ -101,7 +101,8 @@ class Parsing:
             "event_type_8": "player_second_yellow",
             "position": "player_position",
             "home": "is_player_home",
-            "rawStats.price": "player_price"
+            "rawStats.price": "player_price",
+            "rawStats.minutesPlayed": "minutes_played"
         }
 
         for d in data:

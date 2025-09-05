@@ -211,7 +211,7 @@ class PlayersAPI(BiwengerBaseClient):
             "rawStats.roundPhase",
             "rawStats.homeScore",
             "rawStats.awayScore",
-            "rawStats.minuesPlayed",
+            "rawStats.minutesPlayed",
             "rawStats.picas",
             "rawStats.sofascore",
             "rawStats.score5",
