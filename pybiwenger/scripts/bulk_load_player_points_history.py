@@ -7,12 +7,12 @@ from pybiwenger.utils.exporting import Exporting
 from pybiwenger.utils.parsing import Parsing
 
 os.environ["BIWENGER_LEAGUE"] = "SIMPS"
-os.environ["BIWENGER_PROXY"] = "http://pcGW9gOxzm-res-any:PC_6T1OYH0IJ1HYKYaAW@proxy-eu.proxy-cheap.com:5959" #Include the proxy URL if you want to use one
+os.environ["BIWENGER_PROXY"] = "" #Include the proxy URL if you want to use one
 
 players_api = PlayersAPI()
 all_players = players_api.get_all_players()
 
-my_user = "victu"  # Fill with your Linux user
+my_user = ""  # Fill with your Linux user
 
 path = f"/home/{my_user}/biwenger_players_history_data_WITH_DATE/"
 
