@@ -36,7 +36,7 @@ class PlayersAPI(BiwengerBaseClient):
         return (data or {}).get("data", {}).get("players", [])
 
     def __get_user_players_raw(self, owner_id: int) -> List[Dict[str, Any]]:
-        return [p for p in self.__get_users_players_raw() if p.get("owner") == owner_id]
+        return [p for p in self.__get_users_players_raw()]
 
     def __get_catalog(self) -> Dict[str, Dict[str, Any]]:
         if self._catalog is None:
@@ -208,6 +208,7 @@ class PlayersAPI(BiwengerBaseClient):
             "home",
             "match.home.slug",
             "match.away.slug",
+            "match.date",
             "rawStats.roundPhase",
             "rawStats.homeScore",
             "rawStats.awayScore",
@@ -217,6 +218,35 @@ class PlayersAPI(BiwengerBaseClient):
             "rawStats.score5",
             "rawStats.price",
             "events",
+        ]
+        flatted_info = parsing.extract_and_flatten_dict(
+            data=raw_reports, paths=info_to_get
+        )
+
+        return flatted_info
+    
+    def get_points_history_for_inference(self, player: Player, season: str) -> List[Dict]:
+
+        slug = player.slug
+        url_points_history_player_season = (
+            url_cf_player_season.replace("{player_slug}", slug).replace(
+                "{yyyy}", season
+            )
+            + fields_points_history
+        )
+        cat_now = self.fetch_cf(url_points_history_player_season)
+        raw_reports = cat_now.get("data").get("reports")
+
+        parsing = Parsing()
+        info_to_get = [
+            "home",
+            "match.home.slug",
+            "match.away.slug",
+            "match.date", #TODO decide
+            "rawStats.roundPhase",
+            "rawStats.minutesPlayed",
+            "rawStats.score5",
+            "rawStats.price",
         ]
         flatted_info = parsing.extract_and_flatten_dict(
             data=raw_reports, paths=info_to_get
