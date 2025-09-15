@@ -14,7 +14,7 @@ all_players = players_api.get_all_players()
 
 my_user = ""  # Fill with your Linux user
 
-path = f"/home/{my_user}/biwenger_players_history_data/"
+path = f"/home/{my_user}/biwenger_players_history_data_WITH_DATE/"
 
 years_to_get = ["2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018"]
 

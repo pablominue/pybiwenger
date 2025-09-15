@@ -10,9 +10,11 @@ from typing import (Any, DefaultDict, Dict, Iterable, List, Optional, Tuple,
 from pydantic import BaseModel, Field
 
 from pybiwenger.src.client import BiwengerBaseClient
-from pybiwenger.src.client.urls import (fields_points_history, url_catalog,
+from pybiwenger.src.client.urls import (fields_points_history,
+                                        fields_price_history, url_catalog,
                                         url_cf_player_season, url_competitions,
-                                        url_league, url_user_players)
+                                        url_league, url_players_market,
+                                        url_user_players)
 from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
 from pybiwenger.utils.log import PabLog
@@ -30,13 +32,19 @@ class PlayersAPI(BiwengerBaseClient):
         self._league_url = url_league[0] + str(self.league_id)
         self._catalog = None
         self._users_index = None
+        self._url_players_market = url_players_market
 
     def __get_users_players_raw(self) -> List[Dict[str, Any]]:
         data = self.fetch(self._users_players_url)
         return (data or {}).get("data", {}).get("players", [])
 
     def __get_user_players_raw(self, owner_id: int) -> List[Dict[str, Any]]:
-        return [p for p in self.__get_users_players_raw() if p.get("owner") == owner_id]
+        return [p for p in self.__get_users_players_raw()]
+
+    def __get_free_market_players_raw(self) -> List[Dict[str, Any]]:
+        data = self.fetch(self._url_players_market)
+        data = (data or {}).get("data", {}).get("sales", {})
+        return [p for p in data if p.get("user") is None]
 
     def __get_catalog(self) -> Dict[str, Dict[str, Any]]:
         if self._catalog is None:
@@ -208,13 +216,15 @@ class PlayersAPI(BiwengerBaseClient):
             "home",
             "match.home.slug",
             "match.away.slug",
+            "match.date",
             "rawStats.roundPhase",
             "rawStats.homeScore",
             "rawStats.awayScore",
-            "rawStats.minuesPlayed",
+            "rawStats.minutesPlayed",
             "rawStats.picas",
             "rawStats.sofascore",
             "rawStats.score5",
+            "rawStats.price",
             "events",
         ]
         flatted_info = parsing.extract_and_flatten_dict(
@@ -222,3 +232,60 @@ class PlayersAPI(BiwengerBaseClient):
         )
 
         return flatted_info
+
+    def get_points_history_for_inference(
+        self, player: Player, season: str
+    ) -> List[Dict]:
+
+        slug = player.slug
+        url_points_history_player_season = (
+            url_cf_player_season.replace("{player_slug}", slug).replace(
+                "{yyyy}", season
+            )
+            + fields_points_history
+        )
+        cat_now = self.fetch_cf(url_points_history_player_season)
+        raw_reports = cat_now.get("data").get("reports")
+
+        parsing = Parsing()
+        info_to_get = [
+            "home",
+            "match.home.slug",
+            "match.away.slug",
+            "match.date",
+            "rawStats.roundPhase",
+            "rawStats.minutesPlayed",
+            "rawStats.score5",
+            "rawStats.price",
+        ]
+        flatted_info = parsing.extract_and_flatten_dict(
+            data=raw_reports, paths=info_to_get
+        )
+
+        return flatted_info
+
+    def get_market_history(self, player: Player, season: str = "2025") -> List[Dict]:
+        slug = player.slug
+        url_market_history_player_season = (
+            url_cf_player_season.replace("{player_slug}", slug).replace(
+                "{yyyy}", season
+            )
+            + fields_price_history
+        )
+        cat_now = self.fetch_cf(url_market_history_player_season)
+        raw_prices = cat_now.get("data").get("prices")
+        reformatted_prices = Parsing.reformat_market_history(raw_prices)
+
+        return reformatted_prices
+
+    def get_free_players_in_market_data(self) -> t.Optional[list]:
+        """Fetches market data for players.
+
+        Returns:
+            Optional[dict]: The market data if successful, None otherwise.
+        """
+        player_ids = [
+            int(p["player"]["id"]) for p in self.__get_free_market_players_raw()
+        ]
+        players = [self._enrich_player(pid) for pid in player_ids]
+        return players

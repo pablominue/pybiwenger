@@ -167,13 +167,13 @@ class BiwengerBaseClient:
         else:
             lg.log.error(result["message"])
         if league_name is not None:
-            os.environ["BIWENGER_LEAGUE_NAME"] = league_name
+            os.environ["BIWENGER_LEAGUE"] = league_name
         else:
-            os.environ["BIWENGER_LEAGUE_NAME"] = result["data"]["leagues"][0]["name"]
+            os.environ["BIWENGER_LEAGUE"] = result["data"]["leagues"][0]["name"]
         league_info = [
             x
             for x in result["data"]["leagues"]
-            if x["name"] == os.getenv("BIWENGER_LEAGUE_NAME")
+            if x["name"] == os.getenv("BIWENGER_LEAGUE")
         ][0]
 
         id_league = league_info["id"]

@@ -82,11 +82,31 @@ class Parsing:
         return data
 
     @staticmethod
+    def enrich_and_parse_points_history_info_for_inference(
+        data: List[Dict[str, Any]], player: Player, year: str
+    ) -> List[Dict[str, str]]:
+
+        season = {"season": year}
+
+        player_flatted_info = player.model_dump(
+            include={"slug", "position", "status", "status_info", "price"}
+        )
+        for d in data:
+            d.update(player_flatted_info)
+            d.update(season)
+
+        for d in data:
+            d.pop("events", None)
+
+        return data
+
+    @staticmethod
     def rename_points_history_dict(data: List[Dict[str, str]]) -> List[Dict[str, str]]:
         mapping = {
             "status.status": "status",
             "match.home.slug": "home_team",
             "match.away.slug": "away_team",
+            "match.date": "date",
             "rawStats.roundPhase": "league_round",
             "rawStats.homeScore": "home_team_goals",
             "rawStats.awayScore": "away_team_goals",
@@ -101,6 +121,8 @@ class Parsing:
             "event_type_8": "player_second_yellow",
             "position": "player_position",
             "home": "is_player_home",
+            "rawStats.price": "player_price",
+            "rawStats.minutesPlayed": "minutes_played",
         }
 
         for d in data:
@@ -109,3 +131,41 @@ class Parsing:
                     d[new_key] = d.pop(old_key)
 
         return data
+
+    def rename_points_history_dict_for_inference(
+        data: List[Dict[str, str]], roster
+    ) -> List[Dict[str, str]]:
+        mapping = {
+            "status": "status",
+            "status_info": "status_info",
+            "match.home.slug": "home_team",
+            "match.away.slug": "away_team",
+            "match.date": "date",
+            "rawStats.roundPhase": "league_round",
+            "rawStats.score5": "puntuacion_media_sofascore_as",
+            "slug": "player",
+            "position": "player_position",
+            "home": "is_player_home",
+            "rawStats.price": "player_price_for_match",
+            "price": "player_price_now",
+            "rawStats.minutesPlayed": "minutes_played",
+            "season": "season",
+        }
+
+        for d in data:
+            for old_key, new_key in mapping.items():
+                if old_key in d:
+                    d[new_key] = d.pop(old_key)
+            if roster:
+                d["roster"] = True
+            elif roster == False:
+                d["roster"] = False
+
+        return data
+
+    @staticmethod
+    def reformat_market_history(data: List[List[str]]) -> List[Dict[str, str]]:
+
+        result = [{"date_yyMMdd": d[0], "price": d[1]} for d in data]
+
+        return result
