@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+
 from pybiwenger.types.player import Player
 
 
@@ -79,7 +80,7 @@ class Parsing:
             d.pop("events", None)
 
         return data
-    
+
     @staticmethod
     def enrich_and_parse_points_history_info_for_inference(
         data: List[Dict[str, Any]], player: Player, year: str
@@ -87,7 +88,9 @@ class Parsing:
 
         season = {"season": year}
 
-        player_flatted_info = player.model_dump(include={"slug", "position","status","status_info","price"})
+        player_flatted_info = player.model_dump(
+            include={"slug", "position", "status", "status_info", "price"}
+        )
         for d in data:
             d.update(player_flatted_info)
             d.update(season)
@@ -119,7 +122,7 @@ class Parsing:
             "position": "player_position",
             "home": "is_player_home",
             "rawStats.price": "player_price",
-            "rawStats.minutesPlayed": "minutes_played"
+            "rawStats.minutesPlayed": "minutes_played",
         }
 
         for d in data:
@@ -128,8 +131,10 @@ class Parsing:
                     d[new_key] = d.pop(old_key)
 
         return data
-    
-    def rename_points_history_dict_for_inference(data: List[Dict[str, str]], roster) -> List[Dict[str, str]]:
+
+    def rename_points_history_dict_for_inference(
+        data: List[Dict[str, str]], roster
+    ) -> List[Dict[str, str]]:
         mapping = {
             "status": "status",
             "status_info": "status_info",
@@ -153,16 +158,14 @@ class Parsing:
                     d[new_key] = d.pop(old_key)
             if roster:
                 d["roster"] = True
-            elif roster == False:      
-                d["roster"] = False  
+            elif roster == False:
+                d["roster"] = False
 
         return data
-    
+
     @staticmethod
-    def reformat_market_history(
-        data: List[List[str]]
-    ) -> List[Dict[str, str]]:
+    def reformat_market_history(data: List[List[str]]) -> List[Dict[str, str]]:
 
-        result = [{"date_yyMMdd": d[0], "price": d[1]} for d in data]    
+        result = [{"date_yyMMdd": d[0], "price": d[1]} for d in data]
 
-        return result        
+        return result
