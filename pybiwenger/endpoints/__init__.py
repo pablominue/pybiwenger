@@ -1,1 +1,1 @@
-from pybiwenger.endpoints import Endpoints
+from pybiwenger.endpoints.endpoints import Endpoints
