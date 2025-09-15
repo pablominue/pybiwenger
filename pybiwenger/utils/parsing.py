@@ -1,5 +1,4 @@
 from typing import Any, Dict, List
-
 from pybiwenger.types.player import Player
 
 
@@ -130,7 +129,7 @@ class Parsing:
 
         return data
     
-    def rename_points_history_dict_for_inference(data: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    def rename_points_history_dict_for_inference(data: List[Dict[str, str]], roster) -> List[Dict[str, str]]:
         mapping = {
             "status": "status",
             "status_info": "status_info",
@@ -152,6 +151,10 @@ class Parsing:
             for old_key, new_key in mapping.items():
                 if old_key in d:
                     d[new_key] = d.pop(old_key)
+            if roster:
+                d["roster"] = True
+            elif roster == False:      
+                d["roster"] = False  
 
         return data
     

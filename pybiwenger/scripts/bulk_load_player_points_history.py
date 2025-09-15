@@ -7,7 +7,7 @@ from pybiwenger.utils.exporting import Exporting
 from pybiwenger.utils.parsing import Parsing
 
 os.environ["BIWENGER_LEAGUE"] = "SIMPS"
-os.environ["BIWENGER_PROXY"] = "" #Include the proxy URL if you want to use one
+# os.environ["BIWENGER_PROXY"] = "" #Include the proxy URL if you want to use one
 
 players_api = PlayersAPI()
 all_players = players_api.get_all_players()

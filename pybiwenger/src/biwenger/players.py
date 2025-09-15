@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from pybiwenger.src.client import BiwengerBaseClient
 from pybiwenger.src.client.urls import (fields_price_history, fields_points_history, url_catalog,
                                         url_cf_player_season, url_competitions,
-                                        url_league, url_user_players)
+                                        url_league, url_user_players, url_players_market)
 from pybiwenger.types.player import Player
 from pybiwenger.types.user import Team, User
 from pybiwenger.utils.log import PabLog
@@ -30,6 +30,7 @@ class PlayersAPI(BiwengerBaseClient):
         self._league_url = url_league[0] + str(self.league_id)
         self._catalog = None
         self._users_index = None
+        self._url_players_market = url_players_market
 
     def __get_users_players_raw(self) -> List[Dict[str, Any]]:
         data = self.fetch(self._users_players_url)
@@ -37,6 +38,11 @@ class PlayersAPI(BiwengerBaseClient):
 
     def __get_user_players_raw(self, owner_id: int) -> List[Dict[str, Any]]:
         return [p for p in self.__get_users_players_raw()]
+    
+    def __get_free_market_players_raw(self) -> List[Dict[str, Any]]:
+        data = self.fetch(self._url_players_market)
+        data = (data or {}).get("data", {}).get("sales", {})
+        return [p for p in data if p.get("user") is None]
 
     def __get_catalog(self) -> Dict[str, Dict[str, Any]]:
         if self._catalog is None:
@@ -242,7 +248,7 @@ class PlayersAPI(BiwengerBaseClient):
             "home",
             "match.home.slug",
             "match.away.slug",
-            "match.date", #TODO decide
+            "match.date",
             "rawStats.roundPhase",
             "rawStats.minutesPlayed",
             "rawStats.score5",
@@ -268,3 +274,13 @@ class PlayersAPI(BiwengerBaseClient):
         reformatted_prices = Parsing.reformat_market_history(raw_prices)
         
         return reformatted_prices
+    
+    def get_free_players_in_market_data(self) -> t.Optional[list]:
+        """Fetches market data for players.
+
+        Returns:
+            Optional[dict]: The market data if successful, None otherwise.
+        """
+        player_ids = [int(p["player"]["id"]) for p in self.__get_free_market_players_raw()]
+        players = [self._enrich_player(pid) for pid in player_ids]
+        return players
